@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strconv"
 	"strings"
 )
 
@@ -132,7 +131,9 @@ func (s *seleniumWebDriver) DriverURL() string {
 }
 
 func (s *seleniumWebDriver) stateRequest(req *request) (*stateResponse, error) {
-	var response stateResponse
+	response := &stateResponse{
+		Status: -1,
+	}
 	var err error
 
 	resp, err := s.apiService.performRequest(req.url, req.method, req.body)
@@ -140,12 +141,53 @@ func (s *seleniumWebDriver) stateRequest(req *request) (*stateResponse, error) {
 		return nil, newCommunicationError(err, req.callingMethod, req.url, resp)
 	}
 
-	err = json.Unmarshal(resp, &response)
+	err = json.Unmarshal(resp, response)
 	if err != nil {
 		return nil, newUnmarshallingError(err, req.callingMethod, string(resp))
 	}
-	response.State = strconv.Itoa(response.Status)
-	return &response, nil
+
+	response.State = s.convertStatusToStat(response.Status)
+	return response, nil
+}
+
+func (s *seleniumWebDriver) convertStatusToStat(status int) string {
+	statMapping := map[int]string{
+		-1: "UNKNOWNE STATE",
+		0:  "SUCCESS",
+		6:  "NO_SUCH_SESSION",
+		7:  "NO_SUCH_ELEMENT",
+		8:  "NO_SUCH_FRAME",
+		9:  "UNKNOWN_COMMAND",
+		10: "STALE_ELEMENT_REFERENCE",
+		11: "ELEMENT_NOT_VISIBLE",
+		12: "INVALID_ELEMENT_STATE",
+		13: "UNHANDLED_ERROR",
+		15: "ELEMENT_NOT_SELECTABLE",
+		17: "JAVASCRIPT_ERROR",
+		19: "XPATH_LOOKUP_ERROR",
+		21: "TIMEOUT",
+		23: "NO_SUCH_WINDOW",
+		24: "INVALID_COOKIE_DOMAIN",
+		25: "UNABLE_TO_SET_COOKIE",
+		26: "UNEXPECTED_ALERT_PRESENT",
+		27: "NO_ALERT_PRESENT",
+		28: "ASYNC_SCRIPT_TIMEOUT",
+		29: "INVALID_ELEMENT_COORDINATES",
+		30: "IME_NOT_AVAILABLE",
+		31: "IME_ENGINE_ACTIVATION_FAILED",
+		32: "INVALID_SELECTOR_ERROR",
+		33: "SESSION_NOT_CREATED",
+		34: "MOVE_TARGET_OUT_OF_BOUNDS",
+		51: "INVALID_XPATH_SELECTOR",
+		52: "INVALID_XPATH_SELECTOR_RETURN_TYPER",
+		60: "ELEMENT_NOT_INTERACTABLE",
+		61: "INVALID_ARGUMENT",
+		62: "NO_SUCH_COOKIE",
+		63: "UNABLE_TO_CAPTURE_SCREEN",
+		64: "ELEMENT_CLICK_INTERCEPTED",
+	}
+	return statMapping[status]
+
 }
 
 func (s *seleniumWebDriver) valueRequest(req *request) (*valueResponse, error) {
