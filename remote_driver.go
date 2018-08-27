@@ -3,10 +3,10 @@ package goselenium
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-	"strings"
-
 	"errors"
+	"io"
+	"strconv"
+	"strings"
 )
 
 // NewSeleniumWebDriver creates a new instance of a Selenium web driver with a
@@ -144,7 +144,7 @@ func (s *seleniumWebDriver) stateRequest(req *request) (*stateResponse, error) {
 	if err != nil {
 		return nil, newUnmarshallingError(err, req.callingMethod, string(resp))
 	}
-
+	response.State = strconv.Itoa(response.Status)
 	return &response, nil
 }
 
@@ -235,7 +235,8 @@ type elRequest struct {
 }
 
 type stateResponse struct {
-	State string `json:"state"`
+	State  string `json:"state"`
+	Status int    `json:"status"`
 }
 
 type valueResponse struct {
