@@ -87,6 +87,14 @@ func ByCSSSelector(selector string) By {
 	}
 }
 
+// ByID is used to find a element by its ID
+func ByID(id string) By {
+	return by{
+		t:     "id",
+		value: id,
+	}
+}
+
 // ByLinkText is used to find an anchor element by its innerText.
 func ByLinkText(text string) By {
 	return by{

@@ -103,6 +103,9 @@ type WebDriver interface {
 	// desired capabilities.
 	CreateSession() (*CreateSessionResponse, error)
 
+	// SessionNumbers return the number of running  sessions .
+	SessionNumbers() (*SessionNumbersResponse, error)
+
 	// DeleteSession deletes the current session associated with the web driver.
 	DeleteSession() (*DeleteSessionResponse, error)
 

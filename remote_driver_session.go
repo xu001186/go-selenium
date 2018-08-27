@@ -13,6 +13,14 @@ type CreateSessionResponse struct {
 	SessionID    string                    `json:"sessionId"`
 }
 
+// SessionNumbers is the response returned from the API when the
+// SessionNumbers() method does not throw an error.
+type SessionNumbersResponse struct {
+	Status int               `json:"status"`
+	Value  []json.RawMessage `json:"value"`
+	Number int               `json:"-"`
+}
+
 // CreateSessionCapabilities is a summarisation of the capabilities returned
 // from the CreateSession method.
 type CreateSessionCapabilities struct {
@@ -39,6 +47,26 @@ type SessionStatusResponse struct {
 // SetSessionTimeoutResponse() method is called.
 type SetSessionTimeoutResponse struct {
 	State string
+}
+
+func (s *seleniumWebDriver) SessionNumbers() (*SessionNumbersResponse, error) {
+	var response SessionNumbersResponse
+	var err error
+
+	url := fmt.Sprintf("%s/sessions", s.seleniumURL)
+
+	resp, err := s.apiService.performRequest(url, "GET", nil)
+	if err != nil {
+		return nil, newCommunicationError(err, "SessionNumbers", url, resp)
+	}
+
+	err = json.Unmarshal(resp, &response)
+	if err != nil {
+		return nil, newUnmarshallingError(err, "CreateSession", string(resp))
+	}
+	response.Number = len(response.Value)
+	return &response, nil
+
 }
 
 func (s *seleniumWebDriver) CreateSession() (*CreateSessionResponse, error) {
