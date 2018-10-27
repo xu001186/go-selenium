@@ -14,6 +14,7 @@ func Test_AlertDismissAlert_InvalidSessionIdResultsInError(t *testing.T) {
 		jsonToReturn:  "",
 		errorToReturn: nil,
 	}
+	//
 
 	d := setUpDriver(setUpDefaultCaps(), api)
 
